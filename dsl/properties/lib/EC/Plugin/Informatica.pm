@@ -31,7 +31,7 @@ sub step_deploy_deployment_group {
             $self->bail_out("Deployment Group $parameters->{deploymentGroupName} already exists");
         }
         if (!$exists) {
-            $self->ec->setProperty('/myJobStep/summary', 'Deployment Group does not exist');
+            $self->summary('Deployment Group does not exist');
             $self->logger->info(qq{Deployment Group $parameters->{deploymentGroupName} does not exist});
             $self->create_deployment_group($parameters);
             $self->success("Deployment Grop has been created");
@@ -73,6 +73,9 @@ sub step_run_pmrep {
         $map, $parameters,
         additionalOptions => $parameters->{additionalOptions}
     );
+    $self->logger->info("STDOUT: $result->{stdout}");
+    $self->logger->info("CODE: $result->{code}");
+    $self->logger->info("STDERR: $result->{stderr}");
     if ($result->{stderr}) {
         $self->ec->setOutputParameter('stderr', $result->{stderr});
     }
@@ -85,7 +88,47 @@ sub step_run_pmrep {
         my $out = $result->{stdout} || $result->{stderr};
         $self->bail_out("Command Failed: $out");
     }
-    $self->ec->setProperty('/myJobStep/summary', $result->{stout});
+    $self->summary(refine_output($result->{stout}));
+}
+
+sub step_validate_deploy {
+    my ($self) = @_;
+
+    my $parameters = $self->get_params_as_hashref(qw/
+        config
+        queryName
+        queryType
+        additionalOptions
+        additionalQueryOptions
+    /);
+    my $config = $self->get_config($parameters->{config});
+    $self->connect;
+
+    # Execute query
+    my $map = {queryName => 'q', queryType => 't', outputFile => 'u'};
+    my $output_file = File::Spec->catfile(getcwd(), 'validateQuery');
+    $parameters->{outputFile} = $output_file;
+    eval {
+        my $result = $self->run_pmrep_command("executequery", $map, $parameters,
+            fail_on_error => 1,
+            additionalOptions => $parameters->{additionalQueryOptions}
+        );
+        $self->summary("Execute Query Result: " . refine_output($result->{stdout}));
+        if (! -f $output_file) {
+            die "Output file is empty after the query was executed: $result->{stdout}";
+        }
+        $result = $self->run_pmrep_command('validate',
+            {persistentInput => 'i'},
+            {persistentInput => $output_file},
+            fail_on_error => 1,
+            additionalOptions => $parameters->{additionalOptions}
+        );
+        $self->summary("Validation Result: " . refine_output($result->{stdout}));
+        $self->ec->setOutputParameter('persistentFile', $output_file);
+        1;
+    } or do {
+        $self->bail_out("Failed to validate: $@");
+    };
 }
 
 sub after_init_hook {
@@ -207,7 +250,7 @@ sub create_deployment_group {
         additionalOptions => $params->{additionalOptionsCreate}
     );
     $self->logger->info("Deployment Group has been created");
-    $self->ec->setProperty('/myJobStep/summary', $result->{stdout});
+    $self->summary("Create Deployment Group result: " . refine_output($result->{stdout}));
 }
 
 sub deploy_deployment_group {
@@ -252,7 +295,7 @@ sub deploy_deployment_group {
     );
     $self->logger->info("Deployment Group has been deployed");
     $self->ec->setOutputParameter('controlFilePath', $control_file_path);
-    $self->ec->setProperty('/myJobStep/summary', $result->{stdout});
+    $self->summary("Deploy Deployment Group result: " . refine_output($result->{stdout}));
 }
 
 sub save_control_file {
@@ -299,5 +342,10 @@ sub refine_output {
     return join("\n", @lines);
 }
 
+sub summary {
+    my ($self, $summary) = @_;
+    $self->logger->info($summary);
+    $self->ec->setProperty('/myJobStep/summary', $summary);
+}
 
 1;

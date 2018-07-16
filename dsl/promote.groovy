@@ -17,6 +17,7 @@ def pluginDir = getProperty("/projects/$pluginName/pluginDir").value
 def stepsWithAttachedCredentials = [
 	[procedureName: 'Create and Deploy Deployment Group', stepName: 'Create and Deploy Deployment Group'],
 	[procedureName: 'Run PMREP', stepName: 'Run PMREP'],
+	[procedureName: 'Validate Deployment', stepName: 'Validate Deployment'],
 ]
 // ** end steps with attached credentials
 
