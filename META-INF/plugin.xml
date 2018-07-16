@@ -1,0 +1,14 @@
+<plugin>
+  <key>EC-Informatica</key>
+  <label>EC-Informatica</label>
+  <version>1.0.0</version>
+  <author>Electric Cloud</author>
+  <authorUrl>http://electric-cloud.com/support</authorUrl>
+  <category>Data Management</category>
+  <commander-version min="6.0" />
+  <description></description>
+  <configure>ec_config</configure>
+  <pluginWizardBased>false</pluginWizardBased>
+  <depends min="1.4.1">EC-PluginManager</depends>
+  <help>help.xml</help>
+</plugin>

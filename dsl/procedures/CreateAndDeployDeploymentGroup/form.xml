@@ -1,0 +1,122 @@
+<!--
+
+     Copyright 2016 Electric Cloud, Inc.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+<editor>
+    <formElement>
+        <type>entry</type>
+        <label>Configuration:</label>
+        <property>config</property>
+        <required>1</required>
+        <documentation>Previously defined Configuration Name.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Deployment Group Name:</label>
+        <value></value>
+        <property>ecp_informatica_deploymentGroupName</property>
+        <required>1</required>
+        <documentation>The name of the deployment group. If the Deployment Group exists, the procedure will not deploy anything.</documentation>
+    </formElement>
+    <formElement>
+        <type>select</type>
+        <label>Update Action:</label>
+        <value>fail</value>
+        <option>
+            <name>Fail</name>
+            <label>fail</label>
+        </option>
+        <option>
+            <name>Redeploy</name>
+            <value>redeploy</value>
+        </option>
+        <property>ecp_informatica_updateAction</property>
+        <required>1</required>
+        <documentation>Action to uptake if Deployment Group already exists. Default is "fail".</documentation>
+    </formElement>
+    <formElement>
+        <type>select</type>
+        <property>ecp_informatica_deploymentGroupType</property>
+        <label>Deployment Group Type:</label>
+        <value></value>
+        <option>
+            <name>static</name>
+            <value>static</value>
+        </option>
+        <option>
+            <name>dynamic</name>
+            <value>dynamic</value>
+        </option>
+        <required>0</required>
+        <documentation>Type of the Deployment Group. Will be used in Deployment Group creation.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Query Name:</label>
+        <property>ecp_informatica_queryName</property>
+        <value></value>
+        <required>0</required>
+        <documentation>Query Name to pass for Deployment Group creation.</documentation>
+    </formElement>
+    <formElement>
+        <type>select</type>
+        <label>Query Type:</label>
+        <value></value>
+        <property>ecp_informatica_queryType</property>
+        <required>0</required>
+        <documentation>Query Type to pass for Deployment Group creation.</documentation>
+        <option>
+            <name>shared</name>
+            <value>shared</value>
+        </option>
+        <option>
+            <name>personal</name>
+            <value>personal</value>
+        </option>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Control File Path:</label>
+        <value></value>
+        <property>ecp_informatica_controlFilePath</property>
+        <required>0</required>
+        <documentation>Path to the Control File. Will be used in Deployment Group Deployment. Either this parameter or Control File Content must be specified.</documentation>
+    </formElement>
+    <formElement>
+        <type>textarea</type>
+        <label>Control File Contents:</label>
+        <value></value>
+        <property>ecp_informatica_controlFileContents</property>
+        <required>0</required>
+        <documentation>Content for deployment control file. Will be used in Deployment Group deployment. Either Contents or Path must be specified.</documentation>
+    </formElement>
+    <formElement>
+        <type>textarea</type>
+        <label>Additional Options for Create:</label>
+        <value></value>
+        <property>ecp_informatica_additionalOptionsCreate</property>
+        <required>0</required>
+        <documentation>Additional options to pass to pmrep utility, e.g. -l logFile.log. Will be used for createdeploymentgroup command.</documentation>
+    </formElement>
+    <formElement>
+        <type>textarea</type>
+        <label>Additional Options for Deploy:</label>
+        <value></value>
+        <property>ecp_informatica_additionalOptionsDeploy</property>
+        <required>0</required>
+        <documentation>Additional options to pass to pmrep utility, e.g. -l logFile.log. Will be used for deploydeploymentgroup command.</documentation>
+    </formElement>
+</editor>
