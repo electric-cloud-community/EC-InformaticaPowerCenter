@@ -1,0 +1,51 @@
+<!--
+
+     Copyright 2016 Electric Cloud, Inc.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+<editor>
+    <formElement>
+        <type>entry</type>
+        <label>Configuration:</label>
+        <property>config</property>
+        <required>1</required>
+        <documentation>Previously defined Configuration Name.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Command:</label>
+        <value></value>
+        <property>ecp_informatica_commandName</property>
+        <required>1</required>
+        <documentation>Command to run, e.g. createfolder.</documentation>
+    </formElement>
+    <formElement>
+        <type>textarea</type>
+        <label>Additional Options:</label>
+        <value></value>
+        <property>ecp_informatica_additionalOptions</property>
+        <required>0</required>
+        <documentation>Options to pass to the command, e.g. -n myFolder.</documentation>
+    </formElement>
+    <formElement>
+        <type>credential</type>
+        <label>Credentials:</label>
+        <value></value>
+        <property>ecp_informatica_credential</property>
+        <required>0</required>
+        <documentation>Optional credentials for the command, will be passed as -n and -x options.</documentation>
+        <attachedAsParameterToStep>Run PMREP</attachedAsParameterToStep>
+    </formElement>
+</editor>

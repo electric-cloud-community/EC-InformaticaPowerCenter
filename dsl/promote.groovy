@@ -15,7 +15,8 @@ def pluginDir = getProperty("/projects/$pluginName/pluginDir").value
 //List of procedure steps to which the plugin configuration credentials need to be attached
 // ** steps with attached credentials
 def stepsWithAttachedCredentials = [
-	[procedureName: 'Create and Deploy Deployment Group', stepName: 'Create and Deploy Deployment Group']
+	[procedureName: 'Create and Deploy Deployment Group', stepName: 'Create and Deploy Deployment Group'],
+	[procedureName: 'Run PMREP', stepName: 'Run PMREP'],
 ]
 // ** end steps with attached credentials
 

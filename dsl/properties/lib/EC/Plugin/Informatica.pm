@@ -44,6 +44,50 @@ sub step_deploy_deployment_group {
     };
 }
 
+
+sub step_run_pmrep {
+    my ($self) = @_;
+
+    my $parameters = $self->get_params_as_hashref(qw/
+        config
+        commandName
+        additionalOptions
+        credential
+    /);
+    my $config = $self->get_config($parameters->{config});
+    $self->connect;
+
+    my $map = {};
+
+    if ($parameters->{credential}) {
+        my $xpath = $self->ec->getFullCredential($parameters->{credential});
+        my $user_name = $xpath->findvalue('//userName')->string_value;
+        my $password = $xpath->findvalue('//password')->string_value;
+        $map = {username => 'n', password => 'x'};
+        $parameters->{username} = $user_name;
+        $parameters->{password} = $password;
+        push @{$self->{safe_values}}, $password;
+    }
+
+    my $result = $self->run_pmrep_command($parameters->{commandName},
+        $map, $parameters,
+        additionalOptions => $parameters->{additionalOptions}
+    );
+    if ($result->{stderr}) {
+        $self->ec->setOutputParameter('stderr', $result->{stderr});
+    }
+    if ($result->{stdout}) {
+        my $stdout = substr(refine_output($result->{stdout}), 0, 255);
+        $self->ec->setOutputParameter('stdout', $stdout);
+    }
+
+    if ($result->{code} != 0) {
+        my $out = $result->{stdout} || $result->{stderr};
+        $self->bail_out("Command Failed: $out");
+    }
+    $self->ec->setProperty('/myJobStep/summary', $result->{stout});
+}
+
 sub after_init_hook {
     my ($self, %params) = @_;
 
@@ -60,8 +104,9 @@ sub safe_cmd {
     my ($self, $cmd) = @_;
 
     my $config = $self->get_config;
-    my $password = $config->{password};
-    $cmd =~ s/\Q$password/*****/g;
+    my $safe_values = $self->{safe_values} || [];
+    my $re = join('|', map { quotemeta $_ } @$safe_values);
+    $cmd =~ s/$re/*****/g;
     return $cmd;
 }
 
@@ -85,6 +130,7 @@ sub get_config {
         debugLevel => 'debugLevel'
     }, 'ec_plugin_cfgs');
     $self->{config} = $credentials;
+    push @{$self->{safe_values}}, $credentials->{password};
     $self->logger->level($credentials->{debugLevel});
     return $credentials;
 }
@@ -117,18 +163,12 @@ sub connect {
         portalPortNumber => 'o',
         userSecurityDomain => 's'
     };
-
-    for my $key (keys %$map) {
-        if ($config->{$key}) {
-            my $option = $map->{$key};
-            push @command, "-$option", $config->{$key};
-        }
-    }
-    my $result = $self->run_command(join(' ', @command));
-    if ($result->{code}) {
-        my $out = $result->{stdout} || $result->{stderr};
-        $self->bail_out("Failed to connect: $out");
-    }
+    eval {
+        $self->run_pmrep_command('connect', $map, $config, fail_on_error => 1);
+        1;
+    } or do {
+        $self->bail_out("Connection Failed: $@");
+    };
 }
 
 sub deployment_group_exists {
@@ -237,7 +277,7 @@ sub run_pmrep_command {
     for my $key (keys %$map) {
         if ($parameters->{$key}) {
             my $option = $map->{$key};
-            push @command, "-$option", $parameters->{$key};
+            push @command, "-$option", qq{"$parameters->{$key}"};
         }
     }
 
@@ -250,6 +290,13 @@ sub run_pmrep_command {
         die $result->{stdout} || $result->{stderr};
     }
     return $result;
+}
+
+sub refine_output {
+    my ($output) = @_;
+
+    my @lines = grep { $_  && $_!~ /Informatica\(r\)|Copyright|See patents/} split(/\n+/, $output);
+    return join("\n", @lines);
 }
 
 

@@ -269,7 +269,7 @@ sub bail_out {
 
     $self->error();
     $self->out(1, "BAILED_OUT:\n$msg\n");
-    $self->set_property(summary => $msg);
+    $self->ec->setProperty('/myJobStep/summary' => $msg);
     exit 1;
 }
 
