@@ -42,8 +42,9 @@ sub step_deploy_deployment_group {
         $self->disconnect;
         1;
     } or do {
+        my $err = $@;
         $self->disconnect;
-        $self->bail_out("Failed to deploy deployment group: $@");
+        $self->bail_out("Failed to deploy deployment group:" . $err);
     };
 }
 
@@ -135,8 +136,9 @@ sub step_validate_deploy {
         $self->disconnect;
         1;
     } or do {
+        my $err = $@;
         $self->disconnect;
-        $self->bail_out("Failed to validate: $@");
+        $self->bail_out("Failed to validate: $err");
     };
 }
 
@@ -160,8 +162,9 @@ sub step_rollback_deployment {
         $self->disconnect;
         1;
     } or do {
+        my $err = $@;
         $self->disconnect;
-        $self->bail_out("Failed to roll back: $@");
+        $self->bail_out("Failed to roll back: $err");
     };
 }
 
@@ -208,8 +211,9 @@ sub step_register_local_repository {
         $self->disconnect;
         1;
     } or do {
+        my $err = $@;
         $self->disconnect;
-        $self->bail_out("Failed to register local repository: " . refine_output($@));
+        $self->bail_out("Failed to register local repository: " . refine_output($err));
     };
 }
 
@@ -427,6 +431,7 @@ sub run_pmrep_command {
         $command .= ' ' . $options{additionalOptions};
     }
     my $result = $self->run_command($command);
+    $self->logger->debug($result);
     if ($options{fail_on_error} && $result->{code} != 0) {
         my $out = $result->{stdout} || $result->{stderr};
         $out = refine_output($out);
