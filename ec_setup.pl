@@ -70,7 +70,6 @@ my $dslReponse = $commander->evalDsl(
 
 $logfile .= $dslReponse->findnodes_as_string("/");
 my $errorMessage = $commander->getError();
-warn $logfile;
 
 if ( !$errorMessage ) {
     # This is here because we cannot do publishArtifactVersion in dsl today

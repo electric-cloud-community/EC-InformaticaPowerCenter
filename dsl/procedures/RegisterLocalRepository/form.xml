@@ -1,0 +1,69 @@
+<!--
+
+     Copyright 2016 Electric Cloud, Inc.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+<editor>
+    <formElement>
+        <type>entry</type>
+        <label>Configuration:</label>
+        <property>config</property>
+        <required>1</required>
+        <documentation>Previously defined Configuration Name.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Local Repository Name:</label>
+        <property>ecp_informatica_localRepositoryName</property>
+        <required>1</required>
+        <documentation>Local repository name.</documentation>
+    </formElement>
+    <formElement>
+        <type>credential</type>
+        <label>Local Repository Username and Password:</label>
+        <property>ecp_informatica_credential</property>
+        <required>0</required>
+        <documentation>Username and password for the user who manages the global PowerCenter Repository Service.</documentation>
+        <attachedAsParameterToStep>Register Local Repository</attachedAsParameterToStep>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Local Repository Security Domain:</label>
+        <property>ecp_informatica_securityDomain</property>
+        <required>0</required>
+        <documentation>Security domain for the user who manages the global PowerCenter Repository Service. Used with LDAP authentication.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Local Repository Domain Name:</label>
+        <property>ecp_informatica_domainName</property>
+        <required>0</required>
+        <documentation>Select the Informatica domain of the PowerCenter Repository Service for the global repository. Either domain name or portal hostname and port should be specified, but not both.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Local Repository Portal Host Name:</label>
+        <property>ecp_informatica_portalHostname</property>
+        <required>0</required>
+        <documentation>Machine hosting the master gateway node for the linked domain. The machine hosting the master gateway for the local Informatica Domain must have a network connection to this machine. Either domain name or portal hostname and port should be specified, but not both.</documentation>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Local Repository Portal Port Number:</label>
+        <property>ecp_informatica_portalPortNumber</property>
+        <required>0</required>
+        <documentation>Gateway port number for the linked domain. Either domain name or portal hostname and port should be specified, but not both.</documentation>
+    </formElement>
+</editor>

@@ -9,6 +9,7 @@ use Cwd qw(getcwd);
 use JSON;
 use File::Spec;
 
+
 sub step_deploy_deployment_group {
     my ($self) = @_;
 
@@ -38,8 +39,10 @@ sub step_deploy_deployment_group {
         }
         $self->deploy_deployment_group($parameters);
         $self->success("Deployment Group has been deployed");
+        $self->disconnect;
         1;
     } or do {
+        $self->disconnect;
         $self->bail_out("Failed to deploy deployment group: $@");
     };
 }
@@ -86,9 +89,12 @@ sub step_run_pmrep {
 
     if ($result->{code} != 0) {
         my $out = $result->{stdout} || $result->{stderr};
+        $self->disconnect;
         $self->bail_out("Command Failed: $out");
     }
-    $self->summary(refine_output($result->{stout}));
+    $self->success("Run Command finished");
+    $self->summary(refine_output($result->{stdout}));
+    $self->disconnect;
 }
 
 sub step_validate_deploy {
@@ -123,11 +129,87 @@ sub step_validate_deploy {
             fail_on_error => 1,
             additionalOptions => $parameters->{additionalOptions}
         );
+        $self->success('Validation finished successfully');
         $self->summary("Validation Result: " . refine_output($result->{stdout}));
         $self->ec->setOutputParameter('persistentFile', $output_file);
+        $self->disconnect;
         1;
     } or do {
+        $self->disconnect;
         $self->bail_out("Failed to validate: $@");
+    };
+}
+
+sub step_rollback_deployment {
+    my ($self) = @_;
+
+    my $parameters = $self->get_params_as_hashref(qw/
+        config
+        deploymentGroupName
+        deployRunNumber
+    /);
+    my $config = $self->get_config($parameters->{config});
+    $self->connect;
+    eval {
+        my $result = $self->run_pmrep_command('rollbackdeployment',
+            {deploymentGroupName => 'p', deployRunNumber => 't'},
+            $parameters, fail_on_error => 1
+        );
+        $self->success('Rollback finished successfully');
+        $self->summary("Rolled back: " . refine_output($result->{stdout}));
+        $self->disconnect;
+        1;
+    } or do {
+        $self->disconnect;
+        $self->bail_out("Failed to roll back: $@");
+    };
+}
+
+sub step_register_local_repository {
+    my ($self) = @_;
+
+    my $parameters = $self->get_params_as_hashref(qw/
+        config
+        localRepositoryName
+        credential
+        securityDomain
+        domainName
+        portalHostname
+        portalPortNumber
+    /);
+    my $config = $self->get_config($parameters->{config});
+    $self->connect;
+
+    my $map = {
+        localRepositoryName => 'r',
+        securityDomain => 's',
+        domainName => 'd',
+        portalHostname => 'h',
+        portalPortNumber => 'o'
+    };
+
+    if ($parameters->{credential}) {
+        my $xpath = $self->ec->getFullCredential($parameters->{credential});
+        my $user_name = $xpath->findvalue('//userName')->string_value;
+        my $password = $xpath->findvalue('//password')->string_value;
+        $parameters->{username} = $user_name;
+        $parameters->{password} = $password;
+        push @{$self->{safe_values}}, $password;
+        $map->{username} = 'n';
+        $map->{password} = 'x';
+    }
+
+    eval {
+        my $result = $self->run_pmrep_command('register',
+            $map,
+            $parameters, fail_on_error => 1
+        );
+        $self->summary("Registered Local Repository: " . refine_output($result->{stdout}));
+        $self->disconnect;
+        1;
+    } or do {
+        $self->disconnect;
+        $self->bail_out("Failed to register local repository: " . refine_output($@));
     };
 }
 
@@ -170,7 +252,8 @@ sub get_config {
         ecp_informatica_portalHostname => 'portalHostname',
         ecp_informatica_portalPortNumber => 'portalPortNumber',
         ecp_informatica_userSecurityDomain => 'userSecurityDomain',
-        debugLevel => 'debugLevel'
+        debugLevel => 'debugLevel',
+        ecp_informatica_additionalOptions => 'additionalOptions',
     }, 'ec_plugin_cfgs');
     $self->{config} = $credentials;
     push @{$self->{safe_values}}, $credentials->{password};
@@ -207,10 +290,23 @@ sub connect {
         userSecurityDomain => 's'
     };
     eval {
-        $self->run_pmrep_command('connect', $map, $config, fail_on_error => 1);
+        $self->run_pmrep_command('connect', $map, $config, fail_on_error => 1, additionalOptions => $config->{additionalOptions});
         1;
     } or do {
         $self->bail_out("Connection Failed: $@");
+    };
+}
+
+
+sub disconnect {
+    my ($self) = @_;
+
+    eval {
+        my $result = $self->run_pmrep_command('cleanup', {}, {}, fail_on_error => 1);
+        $self->logger->info("Disconnected successfully: " . refine_output($result->{stdout}));
+        1;
+    } or do {
+        $self->bail_out('Failed to disconnect: ' . $@);
     };
 }
 
@@ -312,6 +408,8 @@ sub save_control_file {
 sub run_pmrep_command {
     my ($self, $cmd, $map, $parameters, %options) = @_;
 
+    $map ||= {};
+    $parameters ||= {};
     my $config = $self->get_config;
     my @command = ();
     push @command, $config->{pmrep};
@@ -330,7 +428,9 @@ sub run_pmrep_command {
     }
     my $result = $self->run_command($command);
     if ($options{fail_on_error} && $result->{code} != 0) {
-        die $result->{stdout} || $result->{stderr};
+        my $out = $result->{stdout} || $result->{stderr};
+        $out = refine_output($out);
+        die $out . "\n";
     }
     return $result;
 }

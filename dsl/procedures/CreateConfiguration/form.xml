@@ -83,6 +83,13 @@
         <documentation>Used for LDAP authentication. The name of the security domain.</documentation>
     </formElement>
     <formElement>
+        <type>textarea</type>
+        <label>Additional Connection Options:</label>
+        <property>ecp_informatica_additionalOptions</property>
+        <required>0</required>
+        <documentation>Additional options to pass to connect command, e.g. -u.</documentation>
+    </formElement>
+    <formElement>
         <type>select</type>
         <label>Log Level:</label>
         <property>debugLevel</property>

@@ -18,6 +18,8 @@ def stepsWithAttachedCredentials = [
 	[procedureName: 'Create and Deploy Deployment Group', stepName: 'Create and Deploy Deployment Group'],
 	[procedureName: 'Run PMREP', stepName: 'Run PMREP'],
 	[procedureName: 'Validate Deployment', stepName: 'Validate Deployment'],
+	[procedureName: 'Rollback Deployment', stepName: 'Rollback Deployment'],
+	[procedureName: 'Register Local Repository', stepName: 'Register Local Repository'],
 ]
 // ** end steps with attached credentials
 
