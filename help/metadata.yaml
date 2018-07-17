@@ -1,0 +1,8 @@
+overview: |
+  Informatica PowerCenter is a widely used extraction, transformation and loading (ETL)
+  tool used in building enterprise data warehouses. The components within Informatica
+  PowerCenter aid in extracting data from its source, transforming it as per business
+  requirements and loading it into a target data warehouse.
+  See https://www.informatica.com/products/data-integration/powercenter.html for details.
+supportedVersions:
+  - 10.1.1
