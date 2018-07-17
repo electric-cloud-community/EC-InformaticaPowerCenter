@@ -6,7 +6,7 @@
   <authorUrl>http://electric-cloud.com/support</authorUrl>
   <category>Data Management</category>
   <commander-version min="6.0" />
-  <description></description>
+  <description>Integrates with pmrep Utility on Informatica Power Center</description>
   <configure>ec_config</configure>
   <pluginWizardBased>false</pluginWizardBased>
   <depends min="1.4.1">EC-PluginManager</depends>
