@@ -2,7 +2,7 @@
   <key>EC-InformaticaPowerCenter</key>
   <label>EC-InformaticaPowerCenter</label>
   <version>1.0.0</version>
-  <author>Electric Cloud</author>
+  <author>CloudBees</author>
   <authorUrl>http://electric-cloud.com/support</authorUrl>
   <category>Data Management</category>
   <commander-version min="6.0" />
